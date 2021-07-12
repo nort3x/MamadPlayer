@@ -1,14 +1,14 @@
 # MamadPlayer
 
-MamadPlayer is a simple media-player which can be used both localy and virtually over the LAN network
+MamadPlayer is a simple media-player which can be used both locally and virtually over the LAN network <br/>
+#### contribution is happily accepted 
 
-
-+ netwrok discovery
-+ volume and seekto controlls
++ network discovery
++ volume and seekto controls
 + hot switch between local and over network
 + audio spectrum
 + minimal and simple
-+ easy protocol (no registery and RMI)
++ easy protocol (no registry and RMI)
 
 
 ## Roadmap
@@ -22,3 +22,4 @@ MamadPlayer is a simple media-player which can be used both localy and virtually
 
 ![App Screenshot](https://github.com/nort3x/MamadPlayer/blob/master/img.png)
 
+## 
