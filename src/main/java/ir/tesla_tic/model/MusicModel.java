@@ -1,4 +1,4 @@
-package ir.tesla_tic;
+package ir.tesla_tic.model;
 
 import java.io.File;
 

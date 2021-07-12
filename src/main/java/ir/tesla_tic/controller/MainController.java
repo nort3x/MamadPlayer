@@ -1,14 +1,19 @@
-package ir.tesla_tic;
+package ir.tesla_tic.controller;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXToggleButton;
+import ir.tesla_tic.component.LCell;
+import ir.tesla_tic.component.ServerManager;
+import ir.tesla_tic.model.MusicModel;
+import ir.tesla_tic.player.MediaPlayerASClient;
+import ir.tesla_tic.player.MediaPlayerEntity;
+import ir.tesla_tic.player.SimpleLocalMediaPlayer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.MapChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,9 +32,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.AudioSpectrumListener;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -44,16 +46,16 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class MainController implements Initializable {
 
 
-    SimpleLocalMediaPlayer mp = new SimpleLocalMediaPlayer();
+    MediaPlayerEntity mp = new SimpleLocalMediaPlayer();
     AtomicBoolean isPlaying = new AtomicBoolean(false);
     AtomicBoolean underClick = new AtomicBoolean(false);
 
@@ -75,10 +77,7 @@ public class MainController implements Initializable {
     private MenuItem choose_btn;
 
     @FXML
-    private MenuItem btn_connect;
-
-    @FXML
-    private MenuItem btn_disconnect;
+    private MenuItem btn_scan;
 
     @FXML
     private MenuItem btn_manual;
@@ -167,7 +166,11 @@ public class MainController implements Initializable {
         });
         slider_played.setOnMouseClicked((MouseEvent mouseEvent) -> {
             if(mp!=null) {
-                mp.seekTo(Duration.seconds(slider_played.getValue()).toMillis());
+                try {
+                    mp.seekTo(Duration.seconds(slider_played.getValue()).toMillis());
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -186,12 +189,18 @@ public class MainController implements Initializable {
 
 
         EQ();
-        InitializeMediaPlayer();
+        try {
+            InitializeMediaPlayer();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         addRelations();
     }
 
 
-    private void InitializeMediaPlayer(){
+    private void InitializeMediaPlayer() throws RemoteException {
+
+//        mp.seekTo(new Duration(slider_played.getValue()).toMillis());
 
         mp.totalTimeUpdate((d)->{
             slider_played.setMax(d.toSeconds());
@@ -268,11 +277,19 @@ public class MainController implements Initializable {
         btn_play_stop.setOnAction(e -> {
             if (mp != null) {
                 if (isPlaying.get()) {
-                    mp.pause();
-                    isPlaying.set(false);
+                    try {
+                        mp.pause();
+                        isPlaying.set(false);
+                    } catch (RemoteException remoteException) {
+                        remoteException.printStackTrace();
+                    }
                 } else {
-                    mp.play();
-                    isPlaying.set(true);
+                    try {
+                        mp.play();
+                        isPlaying.set(true);
+                    } catch (RemoteException remoteException) {
+                        remoteException.printStackTrace();
+                    }
                 }
             }
         });
@@ -303,16 +320,50 @@ public class MainController implements Initializable {
                 }
             }
         });
+        btn_scan.setOnAction(e->{
+            ServerManager.getInstance().showManagerPage((Stage) main_vbox.getScene().getWindow());
+            e.consume();
+        });
+
+        btn_stream.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue){
+                    ServerManager.getInstance().getSelected().stream().findFirst().ifPresent(x->{
+                        try {
+                            mp.dispose();
+                            mp = new MediaPlayerASClient(x.getHost(),x.getPort());
+                            InitializeMediaPlayer();
+                            if(currentMusic!=null)
+                            mp.reInitializeWith(currentMusic.getPath().getAbsolutePath());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }else if(! (mp instanceof SimpleLocalMediaPlayer)){
+                    try {
+                        mp.dispose();
+                        mp = new SimpleLocalMediaPlayer();
+                        InitializeMediaPlayer();
+                        mp.reInitializeWith(currentMusic.getPath().getAbsolutePath());
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
     }
 
-    private void initializePlayer(File f) throws MalformedURLException {
+    private void initializePlayer(File f) throws MalformedURLException, RemoteException {
         v.getChildren().clear();
         v.getChildren().add(v2);
         v.getChildren().add(bc);
         v2.getChildren().clear();
-
+        if(mp instanceof SimpleLocalMediaPlayer)
         mp.reInitializeWith(f.getAbsoluteFile().toURI().toURL().toString());
+        else
+            mp.reInitializeWith(f.getAbsolutePath());
         mp.play();
         isPlaying.set(true);
     }
@@ -388,7 +439,7 @@ public class MainController implements Initializable {
 
         try {
             initializePlayer(currentItemSelected);
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | RemoteException e) {
             e.printStackTrace();
         }
     }

@@ -1,13 +1,11 @@
-import ir.tesla_tic.SimpleLocalMediaPlayer;
-import ir.tesla_tic.network.MediaPlayerASClient;
-import ir.tesla_tic.network.MediaPlayerASServer;
+import ir.tesla_tic.player.SimpleLocalMediaPlayer;
+import ir.tesla_tic.player.MediaPlayerASClient;
+import ir.tesla_tic.player.MediaPlayerASServer;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -16,31 +14,31 @@ public class PlayerOverNetworkTestWithFile {
 
         final JFXPanel fxPanel = new JFXPanel();
 
-        MediaPlayerASServer mps = new MediaPlayerASServer(new ServerSocket(9090));
+//        MediaPlayerASServer mps = new MediaPlayerASServer(new ServerSocket(9090));
+//
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                while (true) {
+//                    try {
+//                        mps.doJob();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }).start();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        mps.doJob();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
 
-
-        MediaPlayerASClient mpc = new MediaPlayerASClient("127.0.0.1",9090);
-        mpc.reInitializeWith("/root/Music/Pat-Benatar-Heartbreaker.mp3");
-        mpc.play();
+//        MediaPlayerASClient mpc = new MediaPlayerASClient("127.0.0.1",9090);
+//        mpc.reInitializeWith("/root/Music/Pat-Benatar-Heartbreaker.mp3");
+//        mpc.play();
 
         SimpleLocalMediaPlayer smp = new SimpleLocalMediaPlayer();
-        //smp.reInitializeWith(new File("/root/Music/Pat-Benatar-Heartbreaker.mp3").toURI().toURL().toString());
-        //smp.play();
-        synchronized (mpc){
-            mpc.wait();
+        smp.reInitializeWith("http://127.0.0.1:4546/");
+        smp.play();
+        synchronized (this){
+            this.wait();
         }
 
 

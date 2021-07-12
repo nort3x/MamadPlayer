@@ -1,4 +1,4 @@
-package ir.tesla_tic.network;
+package ir.tesla_tic.model;
 
 
 public class Command {
@@ -46,4 +46,5 @@ public class Command {
     public void setMeta_data(String meta_data) {
         this.meta_data = meta_data;
     }
+
 }

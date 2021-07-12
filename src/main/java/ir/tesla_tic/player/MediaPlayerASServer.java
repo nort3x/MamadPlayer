@@ -1,14 +1,16 @@
-package ir.tesla_tic.network;
+package ir.tesla_tic.player;
 
 import com.google.gson.Gson;
-import ir.tesla_tic.SimpleLocalMediaPlayer;
+import ir.tesla_tic.model.Command;
+import ir.tesla_tic.network.SerializedSocket;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import static ir.tesla_tic.network.Command.Type.*;
+import static ir.tesla_tic.model.Command.Type.*;
 public class MediaPlayerASServer {
     ServerSocket sv;
     SerializedSocket s;
@@ -18,30 +20,34 @@ public class MediaPlayerASServer {
     private Object failLock = new Object();
 
     SimpleDoubleProperty volume = new SimpleDoubleProperty(0.5);
-    SimpleLocalMediaPlayer smp = new SimpleLocalMediaPlayer();
+    VLCMediaPlayer smp = new VLCMediaPlayer();
     ConcurrentLinkedQueue<Command> commandsToSend = new ConcurrentLinkedQueue<>();
     public MediaPlayerASServer(ServerSocket sv) throws IOException {
         this.sv= sv;
-        smp.acceptVolumeBinder(volume);
-        smp.onStopped(()->{
-            commandsToSend.add(new Command(FINISHED,""));
-        });
-        smp.currentPositionUpdate((d)->{
-            commandsToSend.add(new Command(CURRENT,String.valueOf(d.toMillis())));
-        });
+        Platform.runLater(()->{
+            smp.acceptVolumeBinder(volume);
+            smp.onStopped(()->{
+                commandsToSend.add(new Command(FINISHED,""));
+            });
+            smp.currentPositionUpdate((d)->{
+                commandsToSend.add(new Command(CURRENT,String.valueOf(d.toSeconds())));
+            });
 
-        smp.totalTimeUpdate((d)->{
-            commandsToSend.add(new Command(TOTAL,String.valueOf(d.toMillis())));
+            smp.totalTimeUpdate((d)->{
+                commandsToSend.add(new Command(TOTAL,String.valueOf(d.toSeconds())));
+            });
         });
     }
 
     public void doJob() throws Exception {
 
+        commandsToSend.clear();
+
         flag.set(true);
         if(reader!=null)
-            reader.interrupt();
+            reader.stop();
         if(writer!=null)
-            writer.interrupt();
+            writer.stop();
 
         s = new SerializedSocket(sv.accept());
         reader = new Thread(new Runnable() {
@@ -51,24 +57,28 @@ public class MediaPlayerASServer {
                 while (flag.get()){
                     try {
                         Command c = readerGson.fromJson(new String(s.read()),Command.class);
-                        switch (c.t){
-                            case PLAY:
-                                smp.play();
-                                break;
-                            case PAUSE:
-                                smp.pause();
-                                break;
-                            case LOAD:
-                                smp.reInitializeWith(c.meta_data);
-                                break;
-                            case SEEK_TO:
-                                smp.seekTo(Double.parseDouble(c.meta_data));
-                                break;
-                            case VOLUME_TO:
-                                volume.set(Double.parseDouble(c.meta_data));
-                                break;
-                        }
+                        Platform.runLater(()->{
+                            switch (c.getT()){
+                                case PLAY:
+                                    smp.play();
+                                    break;
+                                case PAUSE:
+                                    smp.pause();
+                                    break;
+                                case LOAD:
+                                    smp.softDispose();
+                                    smp.reInitializeWith(c.getMeta_data());
+                                    break;
+                                case SEEK_TO:
+                                    smp.seekTo(Double.parseDouble(c.getMeta_data()));
+                                    break;
+                                case VOLUME_TO:
+                                    volume.set(Double.parseDouble(c.getMeta_data()));
+                                    break;
+                            }
+                        });
                     } catch (IOException e) {
+                        smp.softDispose();
                         e.printStackTrace();
                         synchronized (failLock){
                             failLock.notifyAll();

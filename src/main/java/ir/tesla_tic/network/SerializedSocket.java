@@ -54,4 +54,8 @@ public class SerializedSocket {
     public boolean isClosed(){
         return innerSocket.isClosed();
     }
+
+    public Socket getInnerSocket() {
+        return innerSocket;
+    }
 }

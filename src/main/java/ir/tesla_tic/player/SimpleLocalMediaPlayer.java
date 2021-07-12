@@ -1,4 +1,4 @@
-package ir.tesla_tic;
+package ir.tesla_tic.player;
 
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -7,6 +7,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
 import javafx.scene.media.AudioSpectrumListener;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
@@ -40,13 +41,13 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
 
 
     @Override
-    public void play() {
+    public synchronized void play() {
         if(mp!=null)
             mp.play();
     }
 
     @Override
-    public void pause() {
+    public synchronized void pause() {
         if(mp!=null)
             mp.pause();
     }
@@ -54,62 +55,71 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
 
 
     @Override
-    public void seekTo(double where) {
+    public synchronized void seekTo(double where) {
         if(mp!=null)
         mp.seek(new Duration(where));
     }
 
     @Override
-    public void reInitializeWith(String path) {
+    public synchronized void reInitializeWith(String path) {
         dispose();
         init(path);
     }
 
 
     @Override
-    public void totalTimeUpdate(Consumer<Duration> r)  {
+    public synchronized void totalTimeUpdate(Consumer<Duration> r)  {
         total = r;
     }
 
     @Override
-    public void currentPositionUpdate(Consumer<Duration> r)  {
+    public synchronized void currentPositionUpdate(Consumer<Duration> r)  {
         current =r;
     }
 
     @Override
-    public void onStopped(Runnable r)  {
+    public synchronized void onStopped(Runnable r)  {
         onStop = r;
     }
 
     @Override
-    public void acceptVolumeBinder(ReadOnlyDoubleProperty readOnlyDoubleProperty) {
+    public synchronized void acceptVolumeBinder(ReadOnlyDoubleProperty readOnlyDoubleProperty) {
         volume.bind(readOnlyDoubleProperty);
     }
 
     @Override
-    public void onMetaDataChanged(BiConsumer<String, Object> consumer) {
+    public synchronized void onMetaDataChanged(BiConsumer<String, Object> consumer) {
         meta = consumer;
     }
 
     @Override
-    public void acceptAudioSpectrum(AudioSpectrumListener audioSpectrumListener, double howOftenSeconds)  {
+    public synchronized void acceptAudioSpectrum(AudioSpectrumListener audioSpectrumListener, double howOftenSeconds)  {
         this.audioSpectrumListener = audioSpectrumListener;
         interval = howOftenSeconds;
     }
 
 
 
-    private void dispose(){
+    @Override
+    public synchronized void dispose(){
         if(mp!=null){
-            mp.setOnStopped(()->{});
+            mp.setOnStopped(null);
             mp.volumeProperty().unbind();
             mp.stop();
             mp.dispose();
+            mp = null;
+            System.gc();
         }
     }
 
     private void init(String source){
         mp = new MediaPlayer(new Media(source));
+        mp.errorProperty().addListener(new ChangeListener<MediaException>() {
+            @Override
+            public void changed(ObservableValue<? extends MediaException> observable, MediaException oldValue, MediaException newValue) {
+                System.out.println(observable.getValue());
+            }
+        });
         mp.setOnStopped(onStop);
         mp.setAudioSpectrumListener(audioSpectrumListener);
         mp.setAudioSpectrumInterval(interval);

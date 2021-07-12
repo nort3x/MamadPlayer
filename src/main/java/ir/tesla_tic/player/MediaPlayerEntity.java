@@ -1,4 +1,4 @@
-package ir.tesla_tic;
+package ir.tesla_tic.player;
 
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.media.AudioSpectrumListener;
@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 
 public interface MediaPlayerEntity extends Remote {
 
+    void dispose() throws RemoteException;
     void play() throws RemoteException;
     void pause() throws RemoteException;
 

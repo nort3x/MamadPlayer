@@ -1,8 +1,7 @@
-package ir.tesla_tic;
+package ir.tesla_tic.component;
 
 import com.jfoenix.controls.JFXListCell;
-
-import java.io.File;
+import ir.tesla_tic.model.MusicModel;
 
 public class LCell extends JFXListCell<MusicModel> {
     MusicModel m = new MusicModel();

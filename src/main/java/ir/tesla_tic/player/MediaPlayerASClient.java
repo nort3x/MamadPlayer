@@ -1,25 +1,22 @@
-package ir.tesla_tic.network;
+package ir.tesla_tic.player;
 
 import com.google.gson.Gson;
 import fi.iki.elonen.NanoHTTPD;
-import ir.tesla_tic.MediaPlayerEntity;
+import ir.tesla_tic.model.Command;
+import ir.tesla_tic.network.SerializedSocket;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.media.AudioSpectrumListener;
-import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -30,7 +27,6 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
     SerializedSocket s;
     AtomicBoolean flag = new AtomicBoolean(true);
     ConcurrentLinkedQueue<Command> commandsToSend = new ConcurrentLinkedQueue<>();
-    private Object failLock = new Object();
     MamadoHTTPServer mamadoHTTPServer = new MamadoHTTPServer();
 
 
@@ -107,15 +103,15 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                 while (flag.get()) {
                     try {
                         Command c = readerG.fromJson(new String(s.read()),Command.class);
-                        switch (c.t){
+                        switch (c.getT()){
                             case FINISHED:
                                 onStop.run();
                                 break;
                             case TOTAL:
-                                total.accept(new Duration(Double.parseDouble(c.meta_data)));
+                                total.accept(new Duration(Double.parseDouble(c.getMeta_data())));
                                 break;
                             case CURRENT:
-                                current.accept(new Duration(Double.parseDouble(c.meta_data)));
+                                current.accept(new Duration(Double.parseDouble(c.getMeta_data())));
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -126,6 +122,17 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
         }).start();
 
 
+    }
+
+    @Override
+    public void dispose() throws RemoteException {
+        mamadoHTTPServer.closeAllConnections();
+        mamadoHTTPServer.stop();
+        try {
+            s.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -146,11 +153,10 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
     }
 
     @Override
-    public void reInitializeWith(String path) {
+    public void reInitializeWith(String path) throws RemoteException {
         mamadoHTTPServer.initWithFile(path);
         commandsToSend.add(new Command(Command.Type.LOAD,
-
-                "http:/"+s.innerSocket.getInetAddress().getHostAddress().toString()+":4546/"
+                "http://"+s.getInnerSocket().getInetAddress().getHostAddress().toString()+":4546/"
                 ));
     }
 
@@ -212,7 +218,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
         public Response serve(IHTTPSession session) {
             try {
                 FileInputStream fis = new FileInputStream(serving_file);
-                return newFixedLengthResponse(Response.Status.OK, "audio/mpeg",fis,serving_file.length());
+                return newFixedLengthResponse(Response.Status.OK, "audio/mp3",fis,serving_file.length());
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

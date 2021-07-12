@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox stylesheets="app.css" fx:controller="ir.tesla_tic.MainController" fx:id="main_vbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="main_vbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="app.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.tesla_tic.controller.MainController">
    <children>
       <MenuBar prefHeight="0.0" prefWidth="761.0" VBox.vgrow="ALWAYS">
         <menus>
@@ -26,9 +26,8 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Network">
             <items>
-              <MenuItem fx:id="btn_connect" mnemonicParsing="false" text="connect" />
+              <MenuItem fx:id="btn_scan" mnemonicParsing="false" text="scan" />
                 <MenuItem fx:id="btn_terminal" mnemonicParsing="false" text="terminal" />
-                  <MenuItem fx:id="btn_disconnect" mnemonicParsing="false" text="disconnect" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">

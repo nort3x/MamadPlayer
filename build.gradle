@@ -47,7 +47,7 @@ dependencies {
     implementation 'no.tornado:tornadofx:1.7.20'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.github.oshi:oshi-core:5.7.1'
-
+    implementation 'uk.co.caprica:vlcj-javafx:1.0.2'
     implementation 'com.google.code.gson:gson:2.8.7'
 
 }
