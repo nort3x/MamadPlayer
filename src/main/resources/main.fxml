@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXSlider?>
+<?import com.jfoenix.controls.JFXToggleButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox stylesheets="app.css" fx:controller="ir.tesla_tic.MainController" fx:id="main_vbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <MenuBar prefHeight="0.0" prefWidth="761.0" VBox.vgrow="ALWAYS">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem fx:id="choose_btn" mnemonicParsing="false" text="choose" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Network">
+            <items>
+              <MenuItem fx:id="btn_connect" mnemonicParsing="false" text="connect" />
+                <MenuItem fx:id="btn_terminal" mnemonicParsing="false" text="terminal" />
+                  <MenuItem fx:id="btn_disconnect" mnemonicParsing="false" text="disconnect" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem fx:id="btn_manual" mnemonicParsing="false" text="manual" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <SplitPane dividerPositions="0.3112244897959184" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+         <items>
+            <JFXListView fx:id="list_music" />
+            <Pane fx:id="right_pane" prefHeight="200.0" prefWidth="200.0" />
+         </items>
+      </SplitPane>
+      <HBox alignment="CENTER" prefHeight="43.0" prefWidth="600.0" spacing="5.0">
+         <children>
+            <ButtonBar prefHeight="40.0" prefWidth="200.0">
+               <buttons>
+                  <JFXButton fx:id="btn_prev" text="prev" />
+                  <JFXButton fx:id="btn_play_stop" text="play/stop" />
+                  <JFXButton fx:id="btn_next" text="next" />
+               </buttons>
+            </ButtonBar>
+            <Region prefHeight="43.0" prefWidth="38.0" HBox.hgrow="ALWAYS">
+               <opaqueInsets>
+                  <Insets right="5.0" />
+               </opaqueInsets>
+            </Region>
+            <JFXToggleButton fx:id="btn_stream" prefHeight="60.0" prefWidth="205.0" text="stream" />
+            <JFXSlider fx:id="slider_volume" prefHeight="26.0" prefWidth="108.0" showTickMarks="true" />
+         </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets right="10.0" />
+         </padding>
+      </HBox>
+      <JFXSlider fx:id="slider_played" showTickLabels="true" showTickMarks="true" />
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="5.0" right="5.0" />
+   </padding>
+</VBox>

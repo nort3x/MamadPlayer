@@ -1,0 +1,27 @@
+.chart{
+    -fx-background-color: transparent;
+}
+.axis {
+    -fx-tick-mark-visible: false;
+    -fx-minor-tick-visible: false;
+    -fx-minor-tick-length: 0;
+    -fx-border-color: transparent;
+}
+.axis-label {
+    -fx-text-fill: transparent;
+}
+.default-color0.chart-bar {
+    -fx-background-color:linear-gradient(to top,grey,whitesmoke);
+}
+.default-color1.chart-bar {
+    -fx-background-color:linear-gradient(to bottom,aqua,white);
+}
+
+
+.button{
+    -fx-background-color: #dedede;
+}
+
+.menu-button:hover{
+    -fx-background-color: linear-gradient(to top,transparent, gray);
+}
