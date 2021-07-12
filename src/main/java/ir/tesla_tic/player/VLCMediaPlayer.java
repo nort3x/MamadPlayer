@@ -7,7 +7,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.media.AudioSpectrumListener;
 import javafx.util.Duration;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.media.Media;
 import uk.co.caprica.vlcj.media.MediaEventAdapter;
+import uk.co.caprica.vlcj.media.Meta;
 import uk.co.caprica.vlcj.media.events.MediaEventFactory;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
@@ -19,20 +21,7 @@ import java.util.function.Consumer;
 public class VLCMediaPlayer implements MediaPlayerEntity {
 
     SimpleDoubleProperty volume = new SimpleDoubleProperty(0.5);//
-    AudioSpectrumListener audioSpectrumListener = new AudioSpectrumListener() {
-        @Override
-        public void spectrumDataUpdate(double timestamp, double duration, float[] magnitudes, float[] phases) {
 
-        }
-    };
-    double interval = 0.01;
-
-    BiConsumer<String, Object> meta = new BiConsumer<String, Object>() {
-        @Override
-        public void accept(String s, Object o) {
-
-        }
-    };
 
 
 
@@ -65,7 +54,7 @@ public class VLCMediaPlayer implements MediaPlayerEntity {
 
     @Override
     public void seekTo(double where)  {
-        mp.mediaPlayer().controls().setPosition((float) where);
+        mp.mediaPlayer().controls().setPosition(((float) where)/100f);
     }
 
     @Override
@@ -107,13 +96,18 @@ public class VLCMediaPlayer implements MediaPlayerEntity {
 
     @Override
     public void onMetaDataChanged(BiConsumer<String, Object> consumer)  {
-     meta = consumer;
+     mp.mediaPlayer().events().addMediaEventListener(new MediaEventAdapter(){
+         @Override
+         public void mediaMetaChanged(Media media, Meta metaType) {
+             super.mediaMetaChanged(media, metaType);
+             consumer.accept(metaType.name(),mp.mediaPlayer().media().meta().get(metaType));
+         }
+     });
     }
 
     @Override
     public void acceptAudioSpectrum(AudioSpectrumListener audioSpectrumListener, double howOftenSeconds)  {
-     this.audioSpectrumListener = audioSpectrumListener;
-     interval = howOftenSeconds;
+        //TODO
     }
 
     public void softDispose(){

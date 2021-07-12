@@ -19,7 +19,7 @@ public class Main {
 
 
 
-        if(args.length>0 && args[0].equals("server")){
+        if(args.length>0 && args[0].equals("server") || true){
             Platform.startup(()->{});
             DiscoverableServer ds = new DiscoverableServer(new DiscoveredServer("mainsv","127.0.0.1",9090));
             new Thread(new Runnable() {

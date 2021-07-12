@@ -167,7 +167,10 @@ public class MainController implements Initializable {
         slider_played.setOnMouseClicked((MouseEvent mouseEvent) -> {
             if(mp!=null) {
                 try {
-                    mp.seekTo(Duration.seconds(slider_played.getValue()).toMillis());
+                    if(mp instanceof MediaPlayerASClient){
+                        mp.seekTo(slider_played.getValue());
+                    }else
+                        mp.seekTo(Duration.seconds(slider_played.getValue()).toMillis());
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

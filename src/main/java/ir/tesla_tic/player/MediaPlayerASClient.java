@@ -108,10 +108,10 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                                 onStop.run();
                                 break;
                             case TOTAL:
-                                total.accept(new Duration(Double.parseDouble(c.getMeta_data())));
+                                total.accept(Duration.seconds(Double.parseDouble(c.getMeta_data())));
                                 break;
                             case CURRENT:
-                                current.accept(new Duration(Double.parseDouble(c.getMeta_data())));
+                                current.accept(Duration.seconds(Double.parseDouble(c.getMeta_data())));
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXToggleButton?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Text?>
+
+<?import ir.tesla_tic.component.ServerSelector?>
+<fx:root  xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/15.0.1" type="GridPane">
+  <columnConstraints>
+    <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="293.0" minWidth="10.0" prefWidth="121.0" />
+    <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="525.0" minWidth="10.0" prefWidth="273.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="525.0" minWidth="10.0" prefWidth="182.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+   <children>
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Server Name:" />
+      <Text fx:id="txt_name" strokeType="OUTSIDE" strokeWidth="0.0" text="NAME" GridPane.columnIndex="1" />
+      <JFXToggleButton fx:id="toggle_connect" contentDisplay="RIGHT" text="Connect" GridPane.columnIndex="2" />
+   </children>
+</fx:root>
