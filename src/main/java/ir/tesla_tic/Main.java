@@ -19,9 +19,8 @@ public class Main {
 
 
 
-        if(args.length>0 && args[0].equals("server") || true){
-            Platform.startup(()->{});
-            DiscoverableServer ds = new DiscoverableServer(new DiscoveredServer("mainsv","127.0.0.1",9090));
+        if(args.length>0 && args[0].equals("-server")){
+            DiscoverableServer ds = new DiscoverableServer(new DiscoveredServer(args[3],args[1],Integer.parseInt(args[2])));
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -41,10 +40,9 @@ public class Main {
                 }
             }).start();
 
-            MediaPlayerASServer mediaPlayerASServer = null;
 
             try {
-                mediaPlayerASServer = new MediaPlayerASServer(new ServerSocket(9090));
+                MediaPlayerASServer mediaPlayerASServer = new MediaPlayerASServer(new ServerSocket(Integer.parseInt(args[2])));
                 while (true) {
                     try {
                         mediaPlayerASServer.doJob();

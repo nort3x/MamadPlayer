@@ -3,7 +3,6 @@ package ir.tesla_tic.player;
 import com.google.gson.Gson;
 import ir.tesla_tic.model.Command;
 import ir.tesla_tic.network.SerializedSocket;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 
 import java.io.IOException;
@@ -24,7 +23,7 @@ public class MediaPlayerASServer {
     ConcurrentLinkedQueue<Command> commandsToSend = new ConcurrentLinkedQueue<>();
     public MediaPlayerASServer(ServerSocket sv) throws IOException {
         this.sv= sv;
-        Platform.runLater(()->{
+
             smp.acceptVolumeBinder(volume);
             smp.onStopped(()->{
                 commandsToSend.add(new Command(FINISHED,""));
@@ -36,7 +35,7 @@ public class MediaPlayerASServer {
             smp.totalTimeUpdate((d)->{
                 commandsToSend.add(new Command(TOTAL,String.valueOf(d.toSeconds())));
             });
-        });
+
     }
 
     public void doJob() throws Exception {
@@ -57,8 +56,8 @@ public class MediaPlayerASServer {
                 while (flag.get()){
                     try {
                         Command c = readerGson.fromJson(new String(s.read()),Command.class);
-                        Platform.runLater(()->{
-                            switch (c.getT()){
+
+                            switch (c.getT()) {
                                 case PLAY:
                                     smp.play();
                                     break;
@@ -67,7 +66,7 @@ public class MediaPlayerASServer {
                                     break;
                                 case LOAD:
                                     smp.softDispose();
-                                    smp.reInitializeWith(c.getMeta_data());
+                                    smp.reInitializeWith("http://"+s.getInnerSocket().getInetAddress().getHostAddress()+":4546/");
                                     break;
                                 case SEEK_TO:
                                     smp.seekTo(Double.parseDouble(c.getMeta_data()));
@@ -76,7 +75,6 @@ public class MediaPlayerASServer {
                                     volume.set(Double.parseDouble(c.getMeta_data()));
                                     break;
                             }
-                        });
                     } catch (IOException e) {
                         smp.softDispose();
                         e.printStackTrace();

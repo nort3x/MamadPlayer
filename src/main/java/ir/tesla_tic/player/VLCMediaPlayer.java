@@ -59,6 +59,7 @@ public class VLCMediaPlayer implements MediaPlayerEntity {
 
     @Override
     public void reInitializeWith(String path)  {
+        System.out.println(path);
         mp.mediaPlayer().media().play(path);
     }
 

@@ -155,9 +155,11 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
     @Override
     public void reInitializeWith(String path) throws RemoteException {
         mamadoHTTPServer.initWithFile(path);
-        commandsToSend.add(new Command(Command.Type.LOAD,
-                "http://"+s.getInnerSocket().getInetAddress().getHostAddress().toString()+":4546/"
-                ));
+        Command debug = new Command(Command.Type.LOAD,
+                "http://"+s.getInnerSocket().getLocalAddress().getHostAddress().toString()+":4546/"
+        );
+        commandsToSend.add(debug);
+        System.out.println(1);
     }
 
 
@@ -204,9 +206,8 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
         File serving_file;
 
         public MamadoHTTPServer() throws IOException {
-            super(4546);
+            super("0.0.0.0",4546);
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-            System.out.println("\nRunning! Point your browsers to http://localhost:8080/ \n");
         }
 
         public synchronized void initWithFile(String filePath){
