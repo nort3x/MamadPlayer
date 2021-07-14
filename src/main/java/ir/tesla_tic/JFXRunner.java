@@ -3,7 +3,9 @@ package ir.tesla_tic;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.util.Objects;
 
@@ -24,7 +26,6 @@ public class JFXRunner extends Application {
 
         primaryStage.setTitle("MamadPlayer");
         primaryStage.setScene(new Scene(FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("main.fxml")))));
-
         primaryStage.show();
 
 

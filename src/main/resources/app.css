@@ -1,20 +1,31 @@
-.chart{
+.bar-chart {
+    -fx-alternative-row-visible: false;
+    -fx-alternative-column-visible: false;
+    -fx-horizontal-grid-lines-visible: false;
+    -fx-vertical-grid-lines-visible:false;
+    -fx-horizontal-zero-line-visible: false;
+    -fx-vertical-zero-line-visible: false;
+    -fx-legend-visible: false;
+}
+
+.chart-plot-background {
     -fx-background-color: transparent;
 }
+
 .axis {
+    -fx-border-color: transparent;
     -fx-tick-mark-visible: false;
     -fx-minor-tick-visible: false;
-    -fx-minor-tick-length: 0;
-    -fx-border-color: transparent;
+    -fx-tick-labels-visible: false;
 }
 .axis-label {
     -fx-text-fill: transparent;
 }
 .default-color0.chart-bar {
-    -fx-background-color:linear-gradient(to top,grey,whitesmoke);
+    -fx-background-color:linear-gradient(to top, #51c600, rgba(0, 255, 240, 0.5));
 }
 .default-color1.chart-bar {
-    -fx-background-color:linear-gradient(to bottom,aqua,white);
+    -fx-background-color:linear-gradient(to bottom, #590076, rgba(200, 0, 255, 0.5));
 }
 
 
@@ -25,3 +36,4 @@
 .menu-button:hover{
     -fx-background-color: linear-gradient(to top,transparent, gray);
 }
+.root { -fx-background-color: transparent; }

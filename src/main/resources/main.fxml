@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<?import ir.tesla_tic.component.RightPane?>
 <VBox fx:id="main_vbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="app.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.tesla_tic.controller.MainController">
    <children>
       <MenuBar prefHeight="0.0" prefWidth="761.0" VBox.vgrow="ALWAYS">
@@ -40,7 +41,7 @@
       <SplitPane dividerPositions="0.3112244897959184" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
          <items>
             <JFXListView fx:id="list_music" />
-            <Pane fx:id="right_pane" prefHeight="200.0" prefWidth="200.0" />
+            <RightPane fx:id="rightPane"/>
          </items>
       </SplitPane>
       <HBox alignment="CENTER" prefHeight="43.0" prefWidth="600.0" spacing="5.0">

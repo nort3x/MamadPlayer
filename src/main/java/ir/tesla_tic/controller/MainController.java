@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXToggleButton;
 import ir.tesla_tic.component.LCell;
+import ir.tesla_tic.component.RightPane;
 import ir.tesla_tic.component.ServerManager;
 import ir.tesla_tic.model.MusicModel;
 import ir.tesla_tic.player.MediaPlayerASClient;
@@ -12,6 +13,7 @@ import ir.tesla_tic.player.MediaPlayerEntity;
 import ir.tesla_tic.player.SimpleLocalMediaPlayer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -56,7 +58,7 @@ public class MainController implements Initializable {
 
 
     MediaPlayerEntity mp = new SimpleLocalMediaPlayer();
-    AtomicBoolean isPlaying = new AtomicBoolean(false);
+    SimpleBooleanProperty isPlaying = new SimpleBooleanProperty(false);
     AtomicBoolean underClick = new AtomicBoolean(false);
 
 
@@ -72,6 +74,8 @@ public class MainController implements Initializable {
     @FXML
     private MenuItem btn_terminal;
 
+    @FXML
+    private RightPane rightPane;
 
     @FXML
     private MenuItem choose_btn;
@@ -85,8 +89,6 @@ public class MainController implements Initializable {
     @FXML
     private JFXListView<MusicModel> list_music;
 
-    @FXML
-    private Pane right_pane;
 
     @FXML
     private JFXButton btn_prev;
@@ -104,16 +106,6 @@ public class MainController implements Initializable {
     private JFXSlider slider_played;
 
 
-    VBox v2 = new VBox(){{
-        setPadding(new Insets(20));
-    }};
-    VBox v = new VBox(){{
-        setAlignment(Pos.CENTER);
-        setSpacing(30);
-        setPadding(new Insets(20,20,20,20));
-        getChildren().add(v2);
-    }};
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -122,14 +114,10 @@ public class MainController implements Initializable {
         slider_volume.setMax(1);
         slider_volume.setMin(0);
         slider_volume.setValue(0.5);
-
-        VBox.setVgrow(v,Priority.ALWAYS);
-
-        HBox.setHgrow(v, Priority.ALWAYS);
-        VBox.setVgrow(v,Priority.ALWAYS);
-        right_pane.getChildren().add(v);
-
-
+        VBox.setVgrow(rightPane,Priority.ALWAYS);
+        HBox.setHgrow(rightPane,Priority.ALWAYS);
+        rightPane.getDanceProperty().bind(isPlaying);
+        rightPane.maxWidthProperty().bind(main_vbox.widthProperty().multiply(0.7));
         slider_volume.setLabelFormatter(new StringConverter<Double>() {
             @Override
             public String toString(Double object) {
@@ -189,6 +177,8 @@ public class MainController implements Initializable {
 
 
         EQ();
+        rightPane.setBarChart(bc);
+        bc.visibleProperty().bind(isPlaying);
         try {
             InitializeMediaPlayer();
         } catch (RemoteException e) {
@@ -225,15 +215,14 @@ public class MainController implements Initializable {
 
         mp.onMetaDataChanged((key,value)->{
             if(value instanceof Image) {
-                ImageView imv = new ImageView((Image) value);
-                imv.setPreserveRatio(true);
-                imv.setSmooth(true);
-                imv.fitHeightProperty().setValue(300);
-                v.getChildren().add(0,imv);
+              rightPane.setImage((Image)value);
             }else if(key.contains("raw meta")){
 
-            }else{
-                v2.getChildren().add(new Text(key+" : " +value));
+            }else if(key.equals("artist")){
+                rightPane.getTxt_singer().setText(value.toString());
+            }
+            else{
+                rightPane.addExtra(key,value.toString());
             }
         });
 
@@ -369,10 +358,6 @@ public class MainController implements Initializable {
     }
 
     private void initializePlayer(File f) throws MalformedURLException, RemoteException {
-        v.getChildren().clear();
-        v.getChildren().add(v2);
-        v.getChildren().add(bc);
-        v2.getChildren().clear();
         if(mp instanceof SimpleLocalMediaPlayer)
         mp.reInitializeWith(f.getAbsoluteFile().toURI().toURL().toString());
         else
@@ -398,9 +383,7 @@ public class MainController implements Initializable {
         bc.setHorizontalGridLinesVisible(false);
         bc.setHorizontalZeroLineVisible(false);
         bc.setVerticalZeroLineVisible(false);
-        bc.setMaxSize(900, 400);
-        bc.setMinSize(900, 400);
-
+        bc.setStyle("-fx-background-color: transparent");
         yAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(yAxis,null,"dB"));
         xAxis.setTickLabelFill(Color.TRANSPARENT);
         yAxis.setTickLabelFill(Color.TRANSPARENT);
@@ -451,6 +434,8 @@ public class MainController implements Initializable {
         currentItemSelected = currentMusic.getPath();
 
         try {
+            rightPane.clear();
+            rightPane.getTxt_title().setText(m.showName());
             initializePlayer(currentItemSelected);
         } catch (MalformedURLException | RemoteException e) {
             e.printStackTrace();
