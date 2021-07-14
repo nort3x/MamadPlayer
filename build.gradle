@@ -35,18 +35,9 @@ repositories {
 dependencies {
 
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
-    implementation 'io.github.typhon0:AnimateFX:1.2.2'
     implementation 'com.jfoenix:jfoenix:9.0.10'
-    implementation 'org.json:json:20201115'
-    implementation 'net.iharder:base64:2.3.8'
-    implementation "org.fxmisc.cssfx:cssfx:1.1.1"
-    implementation 'com.github.ronmamo:reflections:0.9.12'
-    implementation 'io.github.typhon0:AnimateFX:1.2.2'
-    implementation 'com.github.controlsfx:controlsfx:+'
     implementation 'org.kordamp.ikonli:ikonli-javafx:12.2.0'
-    implementation 'no.tornado:tornadofx:1.7.20'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.github.oshi:oshi-core:5.7.1'
     implementation 'uk.co.caprica:vlcj-javafx:1.0.2'
     implementation 'com.google.code.gson:gson:2.8.7'
 
