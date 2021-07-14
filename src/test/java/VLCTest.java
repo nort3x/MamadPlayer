@@ -12,7 +12,7 @@ public class VLCTest {
             synchronized (this){
                 this.wait();
             }
-        } catch (RemoteException | InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

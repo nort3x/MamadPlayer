@@ -120,6 +120,8 @@ public class MediaPlayerASServer {
         });
 
 
+        reader.setDaemon(true);
+        writer.setDaemon(true);
         reader.start();
         writer.start();
 

@@ -18,17 +18,18 @@ public class Main {
     public static void main(String[] args)  {
 
 
-
         if(args.length>0 && args[0].equals("-server")){
-            DiscoverableServer ds = new DiscoverableServer(new DiscoveredServer(args[3],args[1],Integer.parseInt(args[2])));
-            new Thread(new Runnable() {
+
+
+            Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    DiscoverableServer ds = new DiscoverableServer(new DiscoveredServer(args[3],args[1],Integer.parseInt(args[2])));
                     while (true) {
                         try {
                             ds.getDiscovered();
                         } catch (IOException e) {
-                           // e.printStackTrace();
+                            e.printStackTrace();
                         }
                         try {
                             Thread.sleep(1000);
@@ -36,10 +37,17 @@ public class Main {
                             e.printStackTrace();
                         }
                     }
-
                 }
-            }).start();
-
+            });
+            t.setDaemon(true);
+            t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread thread, Throwable throwable) {
+                    System.out.println("error!");
+                    throwable.printStackTrace();
+                }
+            });
+            t.start();
 
             try {
                 MediaPlayerASServer mediaPlayerASServer = new MediaPlayerASServer(new ServerSocket(Integer.parseInt(args[2])));
@@ -54,9 +62,9 @@ public class Main {
                 e.printStackTrace();
             }
 
-        }else
+        }else {
             JFXRunner.run();
-
+        }
     }
 
 

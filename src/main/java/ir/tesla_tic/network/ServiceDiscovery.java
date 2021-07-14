@@ -41,17 +41,18 @@ public class ServiceDiscovery {
 
 
             ds.send(dpSend);
+            String ans=null;
             try {
                 ds.receive(dpRecv);
                 String answer = new String(Arrays.copyOfRange(dpRecv.getData(), 0, dpRecv.getLength()));
                 if (answer.contains(servicePong)) {
-                    return answer.replace(servicePong, "");
+                     ans = answer.replace(servicePong, "");
                 }
             } catch (IOException e) {
                 //e.printStackTrace();
             }
-            ds.close();
-        return null;
+        ds.close();
+        return ans;
     }
 
     /**
@@ -82,6 +83,7 @@ public class ServiceDiscovery {
             dpSend.setAddress(dpRecv.getAddress());
             ds.send(dpSend);
         }
+        ds.close();
 
     }
 

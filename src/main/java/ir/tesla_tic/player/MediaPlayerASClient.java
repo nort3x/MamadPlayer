@@ -69,7 +69,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
 
 
         //writer
-        new Thread(new Runnable() {
+        Thread writer = new Thread(new Runnable() {
             Gson writerG = new Gson();
             @Override
             public void run() {
@@ -92,11 +92,14 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                     }
                 }
             }
-        }).start();
+        });
+        writer.setDaemon(true);
+        writer.start();
+
 
 
          //reader
-        new Thread(new Runnable() {
+        Thread reader = new Thread(new Runnable() {
             Gson readerG = new Gson();
             @Override
             public void run() {
@@ -119,7 +122,9 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                     }
                 }
             }
-        }).start();
+        });
+        reader.setDaemon(true);
+        reader.start();
 
 
     }

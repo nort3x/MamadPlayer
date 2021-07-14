@@ -75,17 +75,17 @@ public class ServerManager extends VBox {
                                         addServer(new ServerSelector(g.fromJson(data, DiscoveredServer.class)));
                                     });
                                 } catch (Exception socketException) {
-                                    socketException.printStackTrace();
+                                    //socketException.printStackTrace();
                                 }
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException interruptedException) {
-                                    interruptedException.printStackTrace();
+                                    //interruptedException.printStackTrace();
                                 }
 
                             }
                         });
-
+                        scannerThread.setDaemon(true);
                         scannerThread.start();
                     }
                     e.consume();
