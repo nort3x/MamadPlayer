@@ -167,10 +167,7 @@ public class MainController implements Initializable {
         slider_played.setOnMouseClicked((MouseEvent mouseEvent) -> {
             if(mp!=null) {
                 try {
-                    if(mp instanceof MediaPlayerASClient){
-                        mp.seekTo(slider_played.getValue());
-                    }else
-                        mp.seekTo(Duration.seconds(slider_played.getValue()).toMillis());
+                    mp.seekTo(slider_played.getValue()/100d);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -205,13 +202,11 @@ public class MainController implements Initializable {
 
 //        mp.seekTo(new Duration(slider_played.getValue()).toMillis());
 
-        mp.totalTimeUpdate((d)->{
-            slider_played.setMax(d.toSeconds());
-        });
+        slider_played.setMax(100);
 
         mp.currentPositionUpdate((d)->{
             if(!underClick.get())
-                slider_played.setValue(d.toSeconds());
+                slider_played.setValue(d*100);
         });
 
         mp.onStopped(new Runnable() {
@@ -336,20 +331,35 @@ public class MainController implements Initializable {
                         try {
                             mp.dispose();
                             mp = new MediaPlayerASClient(x.getHost(),x.getPort());
+                            slider_volume.valueProperty().setValue(slider_volume.getValue());
                             InitializeMediaPlayer();
-                            if(currentMusic!=null)
-                            mp.reInitializeWith(currentMusic.getPath().getAbsolutePath());
+                            if(currentMusic!=null) {
+                                double d = slider_played.getValue();
+                                mp.reInitializeWith(currentMusic.getPath().getAbsolutePath());
+                                mp.seekTo(d/100d);
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     });
-                }else if(! (mp instanceof SimpleLocalMediaPlayer)){
+                }else if(!(mp instanceof SimpleLocalMediaPlayer)){
                     try {
                         mp.dispose();
                         mp = new SimpleLocalMediaPlayer();
                         InitializeMediaPlayer();
-                        mp.reInitializeWith(currentMusic.getPath().getAbsolutePath());
-                    } catch (RemoteException e) {
+                        if(currentMusic!=null) {
+                            slider_volume.valueProperty().setValue(slider_volume.getValue());
+                            double d = slider_played.getValue();
+                            mp.reInitializeWith(currentMusic.getPath().getAbsoluteFile().toURI().toURL().toString());
+                            ((SimpleLocalMediaPlayer)mp).onStartSeekTo(()->{
+                                try {
+                                    mp.seekTo(d / 100d);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+                    } catch (RemoteException | MalformedURLException e) {
                         e.printStackTrace();
                     }
                 }

@@ -10,6 +10,8 @@ import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import static ir.tesla_tic.model.Command.Type.*;
+
+
 public class MediaPlayerASServer {
     ServerSocket sv;
     SerializedSocket s;
@@ -29,12 +31,9 @@ public class MediaPlayerASServer {
                 commandsToSend.add(new Command(FINISHED,""));
             });
             smp.currentPositionUpdate((d)->{
-                commandsToSend.add(new Command(CURRENT,String.valueOf(d.toSeconds())));
+                commandsToSend.add(new Command(CURRENT,String.valueOf(d)));
             });
 
-            smp.totalTimeUpdate((d)->{
-                commandsToSend.add(new Command(TOTAL,String.valueOf(d.toSeconds())));
-            });
 
     }
 
@@ -77,7 +76,7 @@ public class MediaPlayerASServer {
                             }
                     } catch (IOException e) {
                         smp.softDispose();
-                        e.printStackTrace();
+                        //e.printStackTrace();
                         synchronized (failLock){
                             failLock.notifyAll();
                             break;
@@ -109,7 +108,7 @@ public class MediaPlayerASServer {
                     try {
                         s.write(writerG.toJson(c).getBytes());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                         synchronized (failLock){
                             failLock.notifyAll();
                             break;

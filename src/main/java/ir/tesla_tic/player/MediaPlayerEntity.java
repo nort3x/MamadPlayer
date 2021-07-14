@@ -21,8 +21,7 @@ public interface MediaPlayerEntity extends Remote {
 
 
 
-    void totalTimeUpdate(Consumer<Duration> r) throws RemoteException;
-    void currentPositionUpdate(Consumer<Duration> r) throws RemoteException;
+    void currentPositionUpdate(Consumer<Double> r) throws RemoteException;
     void onStopped(Runnable r) throws RemoteException;
     void acceptVolumeBinder(ReadOnlyDoubleProperty readOnlyDoubleProperty) throws RemoteException;
     void onMetaDataChanged(BiConsumer<String,Object> consumer) throws RemoteException;

@@ -54,27 +54,22 @@ public class VLCMediaPlayer implements MediaPlayerEntity {
 
     @Override
     public void seekTo(double where)  {
-        mp.mediaPlayer().controls().setPosition(((float) where)/100f);
+        mp.mediaPlayer().controls().setPosition(((float) where));
     }
 
     @Override
     public void reInitializeWith(String path)  {
-        System.out.println(path);
         mp.mediaPlayer().media().play(path);
     }
 
-    @Override
-    public void totalTimeUpdate(Consumer<Duration> r)  {
-     r.accept(Duration.seconds(100));
-    }
 
     @Override
-    public void currentPositionUpdate(Consumer<Duration> r)  {
+    public void currentPositionUpdate(Consumer<Double> r)  {
      mp.mediaPlayer().events().addMediaPlayerEventListener(new MediaPlayerEventAdapter(){
          @Override
          public void positionChanged(MediaPlayer mediaPlayer, float newPosition) {
              super.positionChanged(mediaPlayer, newPosition);
-             r.accept(Duration.seconds(newPosition*100));
+             r.accept((double)newPosition);
          }
      });
     }

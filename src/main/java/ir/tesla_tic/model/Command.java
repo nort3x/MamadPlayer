@@ -14,7 +14,6 @@ public class Command {
         FINISHED,
         ERROR,
         META,
-        TOTAL,
         CURRENT,
         AUDIO_EQ
     }

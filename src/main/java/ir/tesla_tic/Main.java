@@ -17,14 +17,15 @@ public class Main {
 
     public static void main(String[] args)  {
 
-
+        //args = new String[]{"-server","127.0.0.1","9090","human"};
         if(args.length>0 && args[0].equals("-server")){
 
 
+            String[] finalArgs = args;
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    DiscoverableServer ds = new DiscoverableServer(new DiscoveredServer(args[3],args[1],Integer.parseInt(args[2])));
+                    DiscoverableServer ds = new DiscoverableServer(new DiscoveredServer(finalArgs[3], finalArgs[1],Integer.parseInt(finalArgs[2])));
                     while (true) {
                         try {
                             ds.getDiscovered();

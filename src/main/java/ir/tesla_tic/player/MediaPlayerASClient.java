@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import fi.iki.elonen.NanoHTTPD;
 import ir.tesla_tic.model.Command;
 import ir.tesla_tic.network.SerializedSocket;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -50,14 +51,9 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
 
         }
     };
-    Consumer<Duration> total = new Consumer<Duration>() {
+    Consumer<Double> current = new Consumer<Double>() {
         @Override
-        public void accept(Duration duration) {
-
-        }
-    },current = new Consumer<Duration>() {
-        @Override
-        public void accept(Duration duration) {
+        public void accept(Double aDouble) {
 
         }
     };
@@ -87,7 +83,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                     try {
                         s.write(writerG.toJson(c).getBytes());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                         flag.set(false);
                     }
                 }
@@ -108,16 +104,15 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                         Command c = readerG.fromJson(new String(s.read()),Command.class);
                         switch (c.getT()){
                             case FINISHED:
-                                onStop.run();
-                                break;
-                            case TOTAL:
-                                total.accept(Duration.seconds(Double.parseDouble(c.getMeta_data())));
+                                Platform.runLater(()->{
+                                    onStop.run();
+                                });
                                 break;
                             case CURRENT:
-                                current.accept(Duration.seconds(Double.parseDouble(c.getMeta_data())));
+                                current.accept(Double.valueOf(c.getMeta_data()));
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                         flag.set(false);
                     }
                 }
@@ -136,7 +131,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
         try {
             s.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -164,17 +159,12 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                 "http://"+s.getInnerSocket().getLocalAddress().getHostAddress().toString()+":4546/"
         );
         commandsToSend.add(debug);
-        System.out.println(1);
     }
 
 
-    @Override
-    public void totalTimeUpdate(Consumer<Duration> r)  {
-        total = r;
-    }
 
     @Override
-    public void currentPositionUpdate(Consumer<Duration> r)  {
+    public void currentPositionUpdate(Consumer<Double> r)  {
         current =r;
     }
 

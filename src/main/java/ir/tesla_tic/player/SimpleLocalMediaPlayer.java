@@ -11,6 +11,7 @@ import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
+import java.rmi.RemoteException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -37,7 +38,7 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
 
         }
     };
-    Consumer<Duration> total,current;
+    Consumer<Double> current;
 
 
     @Override
@@ -57,25 +58,21 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
     @Override
     public synchronized void seekTo(double where) {
         if(mp!=null)
-        mp.seek(new Duration(where));
+        mp.seek(new Duration(where*mp.getTotalDuration().toMillis()));
     }
 
     @Override
     public synchronized void reInitializeWith(String path) {
         dispose();
         init(path);
-    }
-
-
-    @Override
-    public synchronized void totalTimeUpdate(Consumer<Duration> r)  {
-        total = r;
+        play();
     }
 
     @Override
-    public synchronized void currentPositionUpdate(Consumer<Duration> r)  {
-        current =r;
+    public void currentPositionUpdate(Consumer<Double> r) throws RemoteException {
+    current  =r ;
     }
+
 
     @Override
     public synchronized void onStopped(Runnable r)  {
@@ -124,16 +121,11 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
         mp.setAudioSpectrumListener(audioSpectrumListener);
         mp.setAudioSpectrumInterval(interval);
         mp.volumeProperty().bind(volume);
-        mp.totalDurationProperty().addListener(new ChangeListener<Duration>() {
-            @Override
-            public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-                total.accept(newValue);
-            }
-        });
         mp.currentTimeProperty().addListener(new ChangeListener<Duration>() {
             @Override
             public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-                current.accept(newValue);
+                if(current!=null && mp!=null && mp.getTotalDuration() !=null)
+                current.accept(newValue.toMillis()/mp.getTotalDuration().toMillis());
             }
         });
         mp.getMedia().getMetadata().addListener(new MapChangeListener<String, Object>() {
@@ -142,5 +134,9 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
                 meta.accept(change.getKey(),change.getValueAdded());
             }
         });
+    }
+
+    public void onStartSeekTo(Runnable r){
+        mp.setOnPlaying(r);
     }
 }
