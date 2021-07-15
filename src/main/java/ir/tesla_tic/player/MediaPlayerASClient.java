@@ -3,9 +3,11 @@ package ir.tesla_tic.player;
 import com.google.gson.Gson;
 import fi.iki.elonen.NanoHTTPD;
 import ir.tesla_tic.model.Command;
+import ir.tesla_tic.model.Meta;
 import ir.tesla_tic.network.SerializedSocket;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.media.AudioSpectrumListener;
@@ -15,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,7 +32,6 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
     AtomicBoolean flag = new AtomicBoolean(true);
     ConcurrentLinkedQueue<Command> commandsToSend = new ConcurrentLinkedQueue<>();
     MamadoHTTPServer mamadoHTTPServer = new MamadoHTTPServer();
-
 
 
     AudioSpectrumListener audioSpectrumListener =  new AudioSpectrumListener() {
@@ -57,7 +59,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
 
         }
     };
-
+    SimpleLocalMediaPlayer smp = new SimpleLocalMediaPlayer();
 
 
     public MediaPlayerASClient(String host,int port) throws IOException {
@@ -110,6 +112,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
                                 break;
                             case CURRENT:
                                 current.accept(Double.valueOf(c.getMeta_data()));
+                                break;
                         }
                     } catch (IOException e) {
                         //e.printStackTrace();
@@ -121,6 +124,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
         reader.setDaemon(true);
         reader.start();
 
+        smp.acceptVolumeBinder(new SimpleDoubleProperty(0));
 
     }
 
@@ -153,12 +157,23 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
     }
 
     @Override
+    public void volumeTo(double where) throws RemoteException {
+        commandsToSend.add(new Command(Command.Type.VOLUME_TO,String.valueOf(where)));
+    }
+
+    @Override
     public void reInitializeWith(String path) throws RemoteException {
         mamadoHTTPServer.initWithFile(path);
         Command debug = new Command(Command.Type.LOAD,
                 "http://"+s.getInnerSocket().getLocalAddress().getHostAddress().toString()+":4546/"
         );
         commandsToSend.add(debug);
+        try {
+            smp.reInitializeWith(new File(path).toURI().toURL().toString());
+            smp.mp.setOnPlaying(smp.mp::stop);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -185,7 +200,7 @@ public class MediaPlayerASClient implements MediaPlayerEntity {
 
     @Override
     public void onMetaDataChanged(BiConsumer<String, Object> consumer) {
-        meta = consumer;
+        smp.onMetaDataChanged(consumer);
     }
 
     @Override

@@ -10,11 +10,13 @@ import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.media.Media;
 import uk.co.caprica.vlcj.media.MediaEventAdapter;
 import uk.co.caprica.vlcj.media.Meta;
+import uk.co.caprica.vlcj.media.Picture;
 import uk.co.caprica.vlcj.media.events.MediaEventFactory;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.component.AudioPlayerComponent;
 
+import java.rmi.RemoteException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -58,6 +60,11 @@ public class VLCMediaPlayer implements MediaPlayerEntity {
     }
 
     @Override
+    public void volumeTo(double where) throws RemoteException {
+        throw new RemoteException("not implemented");
+    }
+
+    @Override
     public void reInitializeWith(String path)  {
         mp.mediaPlayer().media().play(path);
     }
@@ -96,7 +103,15 @@ public class VLCMediaPlayer implements MediaPlayerEntity {
          @Override
          public void mediaMetaChanged(Media media, Meta metaType) {
              super.mediaMetaChanged(media, metaType);
-             consumer.accept(metaType.name(),mp.mediaPlayer().media().meta().get(metaType));
+             media.meta().asMetaData().values().forEach((key,val)->{
+                 consumer.accept(key.name(),val);
+             });
+         }
+
+         @Override
+         public void mediaThumbnailGenerated(Media media, Picture picture) {
+             super.mediaThumbnailGenerated(media, picture);
+             consumer.accept("image",picture.buffer());
          }
      });
     }

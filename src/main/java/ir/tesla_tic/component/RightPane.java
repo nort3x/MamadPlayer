@@ -214,12 +214,13 @@ public class RightPane extends VBox implements Initializable {
     }
 
     public void setBarChart(BarChart bc){
-        this.getChildren().stream().forEach(x->{
-            if(x instanceof BarChart) {
-                RightPane.this.getChildren().remove(x);
-            }
-        });
-        VBox.setVgrow(bc,Priority.ALWAYS);
+        if(this.getChildren().get(this.getChildren().size()-1) instanceof BarChart){
+            this.getChildren().remove(this.getChildren().size()-2,this.getChildren().size());
+        }
+        Region r = new Region();
+        VBox.setVgrow(r,Priority.ALWAYS);
+//        VBox.setVgrow(bc,Priority.ALWAYS);
+        this.getChildren().add(r);
         this.getChildren().add(bc);
     }
 }

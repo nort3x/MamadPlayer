@@ -17,6 +17,7 @@ public interface MediaPlayerEntity extends Remote {
     void pause() throws RemoteException;
 
     void seekTo(double where) throws RemoteException;
+    void volumeTo(double where) throws RemoteException;
     void reInitializeWith(String path) throws RemoteException;
 
 

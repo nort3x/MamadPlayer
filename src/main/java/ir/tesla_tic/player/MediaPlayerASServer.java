@@ -2,8 +2,10 @@ package ir.tesla_tic.player;
 
 import com.google.gson.Gson;
 import ir.tesla_tic.model.Command;
+import ir.tesla_tic.model.Meta;
 import ir.tesla_tic.network.SerializedSocket;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.image.Image;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -32,6 +34,12 @@ public class MediaPlayerASServer {
             });
             smp.currentPositionUpdate((d)->{
                 commandsToSend.add(new Command(CURRENT,String.valueOf(d)));
+            });
+            smp.onMetaDataChanged((key,value)->{
+                if(value instanceof String)
+                commandsToSend.add(new Command(META,new Meta(key,(String)value, Meta.Type.STRING).toString()));
+                if(value instanceof byte[])
+                    commandsToSend.add(new Command(META,new Meta(key,(byte[])value, Meta.Type.STRING).toString()));
             });
 
 

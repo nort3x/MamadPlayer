@@ -11,6 +11,8 @@ import ir.tesla_tic.model.MusicModel;
 import ir.tesla_tic.player.MediaPlayerASClient;
 import ir.tesla_tic.player.MediaPlayerEntity;
 import ir.tesla_tic.player.SimpleLocalMediaPlayer;
+import ir.tesla_tic.serial.SexyArduinoLights;
+import ir.tesla_tic.utils.AmplitudeAverager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -26,7 +28,9 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -50,6 +54,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -67,6 +72,13 @@ public class MainController implements Initializable {
     int currentIndex = -1;
     @FXML
     private VBox main_vbox;
+
+    @FXML
+    private HBox downBox;
+    @FXML
+    private MenuBar mbar;
+    @FXML
+    private SplitPane splitpane;
 
     @FXML
     private JFXToggleButton btn_stream;
@@ -109,15 +121,17 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
+        SexyArduinoLights.getInstance().start();
+        rightPane.setMinWidth(1);
+        rightPane.setMinHeight(1);
         list_music.setCellFactory(param -> new LCell());
 
         slider_volume.setMax(1);
         slider_volume.setMin(0);
         slider_volume.setValue(0.5);
-        VBox.setVgrow(rightPane,Priority.ALWAYS);
-        HBox.setHgrow(rightPane,Priority.ALWAYS);
+        rightPane.setPrefWidth(10);
         rightPane.getDanceProperty().bind(isPlaying);
-        rightPane.maxWidthProperty().bind(main_vbox.widthProperty().multiply(0.7));
+
         slider_volume.setLabelFormatter(new StringConverter<Double>() {
             @Override
             public String toString(Double object) {
@@ -190,6 +204,7 @@ public class MainController implements Initializable {
 
     private void InitializeMediaPlayer() throws RemoteException {
 
+        rightPane.clearExtra();
 //        mp.seekTo(new Duration(slider_played.getValue()).toMillis());
 
         slider_played.setMax(100);
@@ -228,10 +243,12 @@ public class MainController implements Initializable {
 
         mp.acceptAudioSpectrum((double d, double d1, float[] magnitudes , float[] phases) -> {
 
-            for(int i=0;i<magnitudes.length;i++){
+            float[] arr = AmplitudeAverager.reduced(magnitudes,series1Data.length);
+            for(int i=0;i<series1Data.length;i++){
 
-                series1Data[i].setYValue((magnitudes[i]+60)); //Top Series
-                series2Data[i].setYValue(-(magnitudes[i]+60));//Bottom series
+                series1Data[i].setYValue(arr[i]+60); //Top Series
+                //SexyArduinoLights.getInstance().emitLight(arr);
+//                series2Data[i].setYValue(-(magnitudes[i]+60));//Bottom series
             }
 
         },0.05);
@@ -320,12 +337,12 @@ public class MainController implements Initializable {
                         try {
                             mp.dispose();
                             mp = new MediaPlayerASClient(x.getHost(),x.getPort());
-                            slider_volume.valueProperty().setValue(slider_volume.getValue());
                             InitializeMediaPlayer();
                             if(currentMusic!=null) {
                                 double d = slider_played.getValue();
                                 mp.reInitializeWith(currentMusic.getPath().getAbsolutePath());
                                 mp.seekTo(d/100d);
+                                mp.volumeTo(slider_volume.getValue());
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -337,12 +354,12 @@ public class MainController implements Initializable {
                         mp = new SimpleLocalMediaPlayer();
                         InitializeMediaPlayer();
                         if(currentMusic!=null) {
-                            slider_volume.valueProperty().setValue(slider_volume.getValue());
                             double d = slider_played.getValue();
                             mp.reInitializeWith(currentMusic.getPath().getAbsoluteFile().toURI().toURL().toString());
                             ((SimpleLocalMediaPlayer)mp).onStartSeekTo(()->{
                                 try {
                                     mp.seekTo(d / 100d);
+                                    mp.volumeTo(slider_volume.getValue());
                                 } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
@@ -367,12 +384,12 @@ public class MainController implements Initializable {
     }
 
 
-    XYChart.Data[] series1Data = new XYChart.Data[128];
+    XYChart.Data[] series1Data = new XYChart.Data[30];
     XYChart.Data[] series2Data = new XYChart.Data[128];
 
     private void EQ(){
         final CategoryAxis xAxis = new CategoryAxis();
-        final NumberAxis yAxis = new NumberAxis(-50,50,10);
+        final NumberAxis yAxis = new NumberAxis(0,30,10);
 
         final BarChart<String,Number>  bc = new BarChart<>(xAxis,yAxis);
         bc.setLegendVisible(false);
@@ -383,12 +400,15 @@ public class MainController implements Initializable {
         bc.setHorizontalGridLinesVisible(false);
         bc.setHorizontalZeroLineVisible(false);
         bc.setVerticalZeroLineVisible(false);
-        bc.setStyle("-fx-background-color: transparent");
+        bc.setStyle("-fx-background-color: transparent;");
         yAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(yAxis,null,"dB"));
         xAxis.setTickLabelFill(Color.TRANSPARENT);
         yAxis.setTickLabelFill(Color.TRANSPARENT);
         yAxis.setOpacity(0);
         xAxis.setOpacity(0);
+        xAxis.setPrefHeight(0);
+        xAxis.setMinHeight(0);
+        xAxis.setMaxHeight(0);
 
         XYChart.Series<String,Number>  series1 =new XYChart.Series<> ();
         series1.setName("Series Neg");
@@ -398,18 +418,17 @@ public class MainController implements Initializable {
 
 
         for (int i=0; i<series1Data.length; i++) {
-            series1Data[i] = new XYChart.Data<>( Integer.toString(i+1),50);
+            series1Data[i] = new XYChart.Data<>( Integer.toString(i+1),0);
             series1.getData().add(series1Data[i]);
-
         }
-        for (int i=0; i<series2Data.length; i++) {
-            series2Data[i] = new XYChart.Data<>( Integer.toString(i+1),50);
-            series2.getData().add(series2Data[i]);
-
-        }
+//        for (int i=0; i<series2Data.length; i++) {
+//            series2Data[i] = new XYChart.Data<>( Integer.toString(i+1),50);
+//            series2.getData().add(series2Data[i]);
+//
+//        }
 
         bc.getData().add(series1);
-        bc.getData().add(series2);
+//        bc.getData().add(series2);
         this.bc = bc;
     }
     BarChart bc;

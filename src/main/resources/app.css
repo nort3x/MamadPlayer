@@ -21,11 +21,11 @@
 .axis-label {
     -fx-text-fill: transparent;
 }
-.default-color0.chart-bar {
-    -fx-background-color:linear-gradient(to top, #51c600, rgba(0, 255, 240, 0.5));
-}
 .default-color1.chart-bar {
-    -fx-background-color:linear-gradient(to bottom, #590076, rgba(200, 0, 255, 0.5));
+
+}
+.default-color0.chart-bar {
+    -fx-background-color:linear-gradient(from 0% 100% to 100% 0%,  rgba(17, 255, 0, 0.28),rgb(200, 0, 255));
 }
 
 

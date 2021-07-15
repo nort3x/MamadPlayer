@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<fx:root  spacing="10.0" style="-fx-background-color: linear-gradient(to top, #bbb6c1,lightgray);" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox fx:id="hbox_top" alignment="CENTER_LEFT"  spacing="20.0" style="-fx-border-color: linear-gradient(to top,green,blue); -fx-border-width: 5;">
+         <children>
+            <ImageView fx:id="img_main"  pickOnBounds="true" preserveRatio="true">
+            </ImageView>
+            <VBox  spacing="15.0" >
+               <children>
+                  <Text fx:id="txt_title" fill="#3c3c3c" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" >
+                     <font>
+                        <Font name="System Bold Italic" size="20.0" />
+                     </font>
+                  </Text>
+                  <HBox >
+                     <children>
+                        <Text fill="#3c3c3c" strokeType="OUTSIDE" strokeWidth="0.0" text="by ">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Text>
+                        <Text fx:id="txt_singer" fill="#3c3c3c" strokeType="OUTSIDE" strokeWidth="0.0" text="Text">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </HBox>
+      <VBox fx:id="vbox_extra"  spacing="10.0" style="-fx-background-radius: 20; -fx-background-color: red;">
+         <padding>
+            <Insets bottom="10.0" left="20.0" top="10.0" />
+         </padding>
+
+      </VBox>
+   </children>
+</fx:root>

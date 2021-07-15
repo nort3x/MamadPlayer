@@ -25,7 +25,7 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
 
         }
     };
-    double interval = 0.01;
+    double interval = 0.1;
     Runnable onStop = new Runnable() {
         @Override
         public void run() {
@@ -59,6 +59,11 @@ public class SimpleLocalMediaPlayer implements MediaPlayerEntity {
     public synchronized void seekTo(double where) {
         if(mp!=null)
         mp.seek(new Duration(where*mp.getTotalDuration().toMillis()));
+    }
+
+    @Override
+    public void volumeTo(double where) throws RemoteException {
+        mp.setVolume(where);
     }
 
     @Override
