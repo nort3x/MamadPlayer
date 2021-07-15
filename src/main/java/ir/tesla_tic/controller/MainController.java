@@ -13,12 +13,15 @@ import ir.tesla_tic.player.MediaPlayerEntity;
 import ir.tesla_tic.player.SimpleLocalMediaPlayer;
 import ir.tesla_tic.serial.SexyArduinoLights;
 import ir.tesla_tic.utils.AmplitudeAverager;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -28,16 +31,16 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -55,6 +58,8 @@ import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -62,6 +67,7 @@ import java.util.stream.Collectors;
 public class MainController implements Initializable {
 
 
+    @FXML private StackPane stackpane;
     MediaPlayerEntity mp = new SimpleLocalMediaPlayer();
     SimpleBooleanProperty isPlaying = new SimpleBooleanProperty(false);
     AtomicBoolean underClick = new AtomicBoolean(false);
@@ -121,7 +127,7 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        SexyArduinoLights.getInstance().start();
+        //SexyArduinoLights.getInstance().start();
         rightPane.setMinWidth(1);
         rightPane.setMinHeight(1);
         list_music.setCellFactory(param -> new LCell());
@@ -199,6 +205,7 @@ public class MainController implements Initializable {
             e.printStackTrace();
         }
         addRelations();
+        addKeyMappings();
     }
 
 
@@ -359,7 +366,7 @@ public class MainController implements Initializable {
                             ((SimpleLocalMediaPlayer)mp).onStartSeekTo(()->{
                                 try {
                                     mp.seekTo(d / 100d);
-                                    mp.volumeTo(slider_volume.getValue());
+                                    //mp.volumeTo(slider_volume.getValue());
                                 } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
@@ -435,16 +442,35 @@ public class MainController implements Initializable {
 
     private void reloadFolder(File f) {
 
-        try {
-            list_music.getItems().addAll(
+            Thread t = new Thread(()-> {
+                try {
                     Files.walk(f.toPath())
                             .filter(path -> path.toString().endsWith(".mp3") || path.toString().endsWith(".m4a") || path.toString().endsWith(".ogg"))
-                            .map(p -> p.toAbsolutePath().toString()).map(MusicModel::new).collect(Collectors.toList())
-            );
+                            .map(p -> p.toAbsolutePath().toString()).map(MusicModel::new)
+                            .sorted(((musicModel, t1) -> String.CASE_INSENSITIVE_ORDER.compare(musicModel.showName(), t1.showName())))
+                            .forEachOrdered((x) -> {
+                                Platform.runLater(() -> {
+                                    list_music.getItems().add(x);
+                                });
+                            });
+                    Platform.runLater(()->{
+                        list_music.getItems().sort(new Comparator<MusicModel>() {
+                            @Override
+                            public int compare(MusicModel musicModel, MusicModel t1) {
+                                return String.CASE_INSENSITIVE_ORDER.compare(musicModel.showName(), t1.showName());
+                            }
+                        });
+                        list_music.refresh();
+                    });
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            });
+            t.setDaemon(true);
+            t.start();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+
     }
 
     private void selectMusic(MusicModel m){
@@ -461,4 +487,28 @@ public class MainController implements Initializable {
         }
     }
 
+    AtomicBoolean isShowingDialog = new AtomicBoolean(false);
+    private synchronized void showSearchDialog(){
+            if(!isShowingDialog.get()){
+                stackpane.getChildren().add(new SearchDialog(list_music,this::selectMusic));
+            }
+    }
+
+    private void addKeyMappings(){
+        stackpane.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if(event.getCode() == KeyCode.ESCAPE && isShowingDialog.get()){
+                    event.consume();
+                    stackpane.getChildren().remove(1,stackpane.getChildren().size());
+                    isShowingDialog.set(false);
+                }else if(event.getCode().equals(KeyCode.F) && event.isControlDown() && !isShowingDialog.get()){
+                    event.consume();
+                    showSearchDialog();
+                    isShowingDialog.set(true);
+                }
+            }
+        });
+
+    }
 }
