@@ -27,8 +27,7 @@ jobs:
       run: ./gradlew build
     - name: generate fatJar
       run: ./gradlew shadowDistZip
-    - name: perper
-      run: rm .gitignore
+
       
     - name: Commit files
       id: commit
